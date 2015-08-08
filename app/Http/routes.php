@@ -11,6 +11,19 @@
 |
 */
 
-$app->get('/', function () use ($app) {
-    return $app->welcome();
+$api = app('Dingo\Api\Routing\Router');
+
+$api->version('v1.0.0', function ($api) {
+    $api->group(['namespace' => 'App\Http\Controllers', 'prefix' => 'v1.0.0'], function ($api)
+    {
+        $api->post('users/sessions', ['as' => 'users.login', 'uses' => 'AuthController@postLogin']);
+        $api->delete('users/sessions/current', ['as' => 'users.logout', 'uses' => 'AuthController@deleteLogout']);
+    });
+
+    $api->group(['namespace' => 'App\Http\Controllers', 'prefix' => 'v1.0.0', 'middleware' => 'jwt.auth'], function ($api)
+    {
+        $api->get('/', ['as' => 'api.index', 'uses' => 'ApiController@index']);
+        $api->get('/users/{id}', ['as' => 'users.show', 'uses' => 'UserController@show']);
+        $api->get('/users', ['as' => 'users.index', 'uses' => 'UserController@index']);
+    });
 });
